@@ -1,5 +1,17 @@
 //grab our client with destructuring from the export in index.js
-const {client, getAllUsers, createUser, updateUser,  getUserById, getAllPosts, updatePost, createPost,addTagsToPost,createTags} = require('./index');
+const {client, 
+    getAllUsers, 
+    createUser, 
+    updateUser,  
+    getUserById, 
+    getAllPosts, 
+    updatePost, 
+    createPost,
+    addTagsToPost,
+    createTags,
+    getPostById,
+    getPostsByTagName,
+    createPostTag} = require('./index');
 
 async function testDB() {
     try{
@@ -40,6 +52,10 @@ async function testDB() {
         console.log("Result:", updatePostTagsResult);
 
         
+        console.log("Calling getPostsByTagName with #happy");
+        const postsWithHappy = await getPostsByTagName("#happy");
+        console.log("Result:", postsWithHappy);
+
         console.log('Finished database tests!');
 
     }catch(error){
@@ -98,8 +114,9 @@ async function createTables(){
             
         await client.query (`
         CREATE TABLE post_tags (
-            "postId" INTEGER REFERENCES posts(id) UNIQUE,
-            "tagId" INTEGER REFERENCES tags(id) UNIQUE
+            "postId" INTEGER REFERENCES posts(id),
+            "tagId" INTEGER REFERENCES tags(id),
+            UNIQUE ("postId", "tagId")
         );
         `)
         console.log('Finished building tables!')
@@ -157,21 +174,21 @@ async function createInitialPosts()
           authorId: albert.id,
           title: "First Post",
           content: "This is my first post. I hope I love writing blogs as much as I love writing them.",
-          //tags: ["#happy", "#youcandoanything"]
+          tags: ["#happy", "#youcandoanything"]
         });
     
         await createPost({
             authorId: sandra.id,
             title: "First Post",
             content: "This is Sandra's first post. I hope I love writing blogs as much as I love writing them.",
-            //tags: ["#happy", "#worst-day-ever"]
+            tags: ["#happy", "#worst-day-ever"]
           });
 
         await createPost({
             authorId: glamgal.id,
             title: "First Post",
             content: "Fashion is not my passion",
-            //tags: ["#happy", "#youcandoanything", "#canmandoeverything"]
+            tags: ["#happy", "#youcandoanything", "#canmandoeverything"]
         });
 
       } catch (error) {

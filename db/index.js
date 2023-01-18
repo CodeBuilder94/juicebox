@@ -116,21 +116,21 @@ async function updateUser(id, fields = {}) {
       tag => `${ tag.id }`
     ).join(', ');
 
-await client.query(`
-DELETE FROM post_tags
-WHERE "tagId"
-NOT IN (${ tagListIdString })
-AND "postId"=$1;
-`, [postId]);
+  await client.query(`
+  DELETE FROM post_tags
+  WHERE "tagId"
+  NOT IN (${ tagListIdString })
+  AND "postId"=$1;
+  `, [postId]);
 
-await addTagsToPost(postId, tagList);
+  await addTagsToPost(postId, tagList);
 
-    return await getPostById(postId);;
+      return await getPostById(postId);;
 
-    }catch(error) {
-        throw error;
+      }catch(error) {
+          throw error;
+      }
     }
-  }
 
   async function getAllPosts(){
     
@@ -228,7 +228,6 @@ async function createPostTag(postId, tagId){
 
 async function addTagsToPost(postId, tagList)
 {
-  console.log(tagList);
   try{
     const createPostTagPromises = tagList.map(
       tag => createPostTag(postId, tag.id)
@@ -275,6 +274,24 @@ async function getPostById(postId) {
   }
 }
 
+async function getPostsByTagName(tagName) {
+  try {
+    const { rows: postIds } = await client.query(`
+      SELECT posts.id
+      FROM posts
+      JOIN post_tags ON posts.id=post_tags."postId"
+      JOIN tags ON tags.id=post_tags."tagId"
+      WHERE tags.name=$1;
+    `, [tagName]);
+
+    return await Promise.all(postIds.map(
+      post => getPostById(post.id)
+    ));
+  } catch (error) {
+    throw error;
+  }
+} 
+
 module.exports = {
     client,
     getAllUsers,
@@ -286,5 +303,7 @@ module.exports = {
     createPost,
     createTags,
     addTagsToPost,
-    getPostById
+    getPostsByTagName,
+    getPostById,
+    createPostTag,
 }
