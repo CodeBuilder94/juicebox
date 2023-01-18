@@ -286,4 +286,5 @@ module.exports = {
     createPost,
     createTags,
     addTagsToPost,
+    getPostById
 }
